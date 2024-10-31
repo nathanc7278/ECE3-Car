@@ -17,12 +17,12 @@ const int right_nslp_pin=11;
 const int right_dir_pin=30;
 const int right_pwm_pin=39;
 
-const double Kp = 1;
+const double Kp = 0.01;
 const double Ki = 0;
-const double Kd = 1;
+const double Kd = 0.01;
 
-double right_speed = 127;
-double left_speed = 127;
+double right_speed = 30;
+double left_speed = 30;
 
 double p_value;
 double i_value;
@@ -79,8 +79,8 @@ void loop(){
   } else {
     digitalWrite(LED_RF, LOW);
   }
-  right_speed += pid_value;
-  left_speed -= pid_value;
+  int current_right_speed = right_speed + pid_value;
+  int current_left_speed = left_speed - pid_value;
   
   if (right_speed > 255) {
     right_speed = 255;
@@ -95,8 +95,8 @@ void loop(){
     left_speed = 0;
   }
 
-  analogWrite(right_pwm_pin, right_speed);
-  analogWrite(left_pwm_pin, left_speed);
+  analogWrite(right_pwm_pin, current_right_speed);
+  analogWrite(left_pwm_pin, current_left_speed);
 
   previous_error = error;
   
