@@ -50,8 +50,9 @@ void setup(){
   
   ECE3_Init();
   Serial.begin(9600);
-  delay(2000);
   i_value = 0;
+  delay(2000);
+
 }
 
 
@@ -73,15 +74,17 @@ void loop(){
   i_value += error * Ki;
   d_value = (error - previous_error) * Kd;
   pid_value = p_value + i_value + d_value;
-
-  if (pid_value > 0) {                    // LED ON when line is on the left side of car
-    digitalWrite(LED_RF, HIGH);
-  } else {
-    digitalWrite(LED_RF, LOW);
-  }
+  
   int current_right_speed = right_speed + pid_value;
   int current_left_speed = left_speed - pid_value;
-  
+  if (error > 2000) {
+    current_right_speed = right_speed;
+    current_left_speed = 0;
+  }
+  if (error < -2000) {
+    current_right_speed = 0;
+    current_left_speed = left_speed;
+  }
   if (right_speed > 255) {
     right_speed = 255;
   }
