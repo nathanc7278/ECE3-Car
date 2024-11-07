@@ -17,9 +17,9 @@ const int right_nslp_pin=11;
 const int right_dir_pin=30;
 const int right_pwm_pin=39;
 
-const float Kp = 0.01;
+const float Kp = 0.0075;
 const float Ki = 0;
-const float Kd = 0.01;
+const float Kd = 0.045;
 
 int right_speed = 30;
 int left_speed = 30;
@@ -51,24 +51,27 @@ void setup(){
   ECE3_Init();
   Serial.begin(9600);
   i_value = 0;
+  resetEncoderCount_left();
+  resetEncoderCount_right();
   delay(2000);
 
 }
 
+int average_encoder_count() {
+  return ((getEncoderCount_left() + getEncoderCount_right())/2);
+}
 
 
 void loop(){
   error = 0;
-  ECE3_read_IR(sensor_values);
+
+  ECE3_read_IR(sensor_values);  
   for(int i = 0; i < 8; i++) {                     // this block computes the error value and stores it in sensorValues[i]
     sensor_values[i] -= min_array[i];
     sensor_values[i] = sensor_values[i] * 1000 / max_array[i];
     error += sensor_values[i] * weights[i];
   }
   
-  for (int i = 0; i < 8; i++) {
-    
-  }
   error /= 8.0;
   p_value = error * Kp;
   i_value += error * Ki;
@@ -77,30 +80,59 @@ void loop(){
   
   int current_right_speed = right_speed + pid_value;
   int current_left_speed = left_speed - pid_value;
-  if (error > 2000) {
-    current_right_speed = right_speed;
+ 
+  if (current_right_speed > 255) {
+    current_right_speed = 255;
+    
+  }
+  if (current_right_speed < 0) {
+    current_right_speed = 0;
+  }
+  if (current_left_speed > 255) {
+    current_left_speed = 255;
+  }
+  if (current_left_speed < 0) {
     current_left_speed = 0;
   }
-  if (error < -2000) {
-    current_right_speed = 0;
-    current_left_speed = left_speed;
-  }
-  if (right_speed > 255) {
-    right_speed = 255;
-  }
-  if (right_speed < 0) {
-    right_speed = 0;
-  }
-  if (left_speed > 255) {
-    left_speed = 255;
-  }
-  if (left_speed < 0) {
-    left_speed = 0;
+
+  if (average_encoder_count() == 500) {
+    do_turn(50, 0, 500, current_left_speed, current_right_speed);
   }
 
+  if (average_encoder_count() == 1650) {
+    do_turn(0, 50, 175, current_left_speed, current_right_speed);
+  }
+
+  if (average_encoder_count() == 3450) {
+    do_u_turn(30, 25, 425, current_left_speed, current_right_speed);
+  }
   analogWrite(right_pwm_pin, current_right_speed);
   analogWrite(left_pwm_pin, current_left_speed);
-
   previous_error = error;
-  
+}
+
+
+
+void do_turn(const int& left_speed, const int& right_speed, const int& num_encoder_ticks, int& current_left_speed, int& current_right_speed) {
+  int saved = average_encoder_count();
+  while(average_encoder_count() - saved < num_encoder_ticks){
+      current_left_speed = left_speed;
+      current_right_speed = right_speed; 
+      analogWrite(right_pwm_pin, current_right_speed);
+      analogWrite(left_pwm_pin, current_left_speed);
+    }
+}
+
+void do_u_turn(const int& left_speed, const int& right_speed, const int& num_encoder_ticks, int& current_left_speed, int& current_right_speed) {      // right sided u-turn
+  int saved = average_encoder_count();
+  while(average_encoder_count() - saved < num_encoder_ticks){
+      current_left_speed = left_speed;
+      current_right_speed = right_speed; 
+      digitalWrite(left_dir_pin,LOW);
+      digitalWrite(right_dir_pin,HIGH);
+      analogWrite(right_pwm_pin, current_right_speed);
+      analogWrite(left_pwm_pin, current_left_speed);
+    }
+    digitalWrite(left_dir_pin,LOW);
+    digitalWrite(right_dir_pin,LOW);
 }
