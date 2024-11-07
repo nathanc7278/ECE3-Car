@@ -4,9 +4,9 @@ uint16_t sensor_values[8];
 
 
 
-const double min_array[] = {919, 708, 709, 709, 686, 640, 731, 732};
-const double max_array[] = {1581, 1792, 1791, 1791, 1814, 1860, 1769, 1768};
-const double weights[] = {-15, -14, -12, -8, 8, 12, 14, 15};
+const float min_array[] = {919, 708, 709, 709, 686, 640, 731, 732};
+const float max_array[] = {1581, 1792, 1791, 1791, 1814, 1860, 1769, 1768};
+const float weights[] = {-15, -14, -12, -8, 8, 12, 14, 15};
 
 
 const int left_nslp_pin = 31;       // not sleep
@@ -17,19 +17,19 @@ const int right_nslp_pin=11;
 const int right_dir_pin=30;
 const int right_pwm_pin=39;
 
-const double Kp = 0.01;
-const double Ki = 0;
-const double Kd = 0.01;
+const float Kp = 0.01;
+const float Ki = 0;
+const float Kd = 0.01;
 
-double right_speed = 30;
-double left_speed = 30;
+int right_speed = 30;
+int left_speed = 30;
 
-double p_value;
-double i_value;
-double d_value;
-double error;
-double previous_error = 0;
-double pid_value;
+float p_value;
+float i_value;
+float d_value;
+float error;
+float previous_error = 0;
+float pid_value;
 
 const int LED_RF = 41;
 
