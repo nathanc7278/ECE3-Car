@@ -83,7 +83,6 @@ void loop(){
  
   if (current_right_speed > 255) {
     current_right_speed = 255;
-    
   }
   if (current_right_speed < 0) {
     current_right_speed = 0;
@@ -98,18 +97,39 @@ void loop(){
   if (average_encoder_count() == 500) {
     do_turn(50, 0, 500, current_left_speed, current_right_speed);
   }
-
   if (average_encoder_count() == 1650) {
-    do_turn(0, 50, 175, current_left_speed, current_right_speed);
+    do_turn(0, 50, 200, current_left_speed, current_right_speed);
   }
-
-  if (average_encoder_count() == 3450) {
-    do_u_turn(30, 25, 425, current_left_speed, current_right_speed);
+  if (average_encoder_count() == 3500) {
+    do_u_turn(30, 20, 350, current_left_speed, current_right_speed);
+  }
+  if (average_encoder_count() == 6200) {
+    do_turn(0, 50, 50, current_left_speed, current_right_speed);
+  }
+  if (average_encoder_count() == 6450) {
+    do_u_turn(30,30, 350, current_left_speed, current_right_speed);
+  }
+  if (average_encoder_count() == 7000) {
+    do_turn(50, 0, 50, current_left_speed, current_right_speed);
+  }
+  if (average_encoder_count() == 9450) {
+    do_u_turn2(20, 30, 350, current_left_speed, current_right_speed);
+  }
+  if (average_encoder_count() == 11450) {
+    do_turn(50, 0, 200, current_left_speed, current_right_speed);
+  }
+  if (average_encoder_count() == 13000) {
+    do_turn(0, 50, 500, current_left_speed, current_right_speed);
+  }
+  while(average_encoder_count() > 18000) {
+    analogWrite(right_pwm_pin, 0);
+    analogWrite(left_pwm_pin, 0);
   }
   analogWrite(right_pwm_pin, current_right_speed);
   analogWrite(left_pwm_pin, current_left_speed);
   previous_error = error;
 }
+
 
 
 
@@ -130,6 +150,20 @@ void do_u_turn(const int& left_speed, const int& right_speed, const int& num_enc
       current_right_speed = right_speed; 
       digitalWrite(left_dir_pin,LOW);
       digitalWrite(right_dir_pin,HIGH);
+      analogWrite(right_pwm_pin, current_right_speed);
+      analogWrite(left_pwm_pin, current_left_speed);
+    }
+    digitalWrite(left_dir_pin,LOW);
+    digitalWrite(right_dir_pin,LOW);
+}
+
+void do_u_turn2(const int& left_speed, const int& right_speed, const int& num_encoder_ticks, int& current_left_speed, int& current_right_speed) {      // right sided u-turn
+  int saved = average_encoder_count();
+  while(average_encoder_count() - saved < num_encoder_ticks){
+      current_left_speed = left_speed;
+      current_right_speed = right_speed; 
+      digitalWrite(left_dir_pin,HIGH);
+      digitalWrite(right_dir_pin,LOW);
       analogWrite(right_pwm_pin, current_right_speed);
       analogWrite(left_pwm_pin, current_left_speed);
     }
